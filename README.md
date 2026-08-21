@@ -1,5 +1,7 @@
 # Cortex — AI for any part of your Roblox game
 
+![Cortex demo](demo.png)
+
 One server-side HTTP request gives your game a brain: **dialogue, adaptive quests,
 generated items & lore, chat moderation** — anything text-shaped. ~3 seconds a call.
 
