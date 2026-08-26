@@ -16,13 +16,15 @@ local CHS         = game:GetService("ChangeHistoryService")
 local BASE = "https://osa-api.netlify.app/npc"
 
 -- pixel palette, high contrast (bright text guaranteed)
+-- RED UI pixel palette: crimson on pure black
 local C = {
-	bg="0a0b0e", panel="12141a", panel2="1c2029", line="323847",
-	text="f6f8fc", sub="c6cfdc", muted="8a94a6", accent="ffa23e",
-	ok="76e08a", err="ff6f6f",
+	bg="070506", panel="16090b", panel2="230d11", line="8f2a2f",
+	text="f5e7e7", sub="dc9ea0", muted="a75d60", accent="e24a4a", accentL="f0a6a6",
+	ok="8fd89a", err="ff7a5f",
 }
 for k,v in pairs(C) do C[k]=Color3.fromHex(v) end
-local F = Enum.Font.Code   -- mono, renders everywhere, pixel/terminal feel
+local F  = Enum.Font.Code     -- readable mono for body
+local FP = Enum.Font.Arcade   -- pixel display font for the title
 
 local MODELS = { {"gpt-5","gpt-5","🤖"}, {"claude","claude","🧠"}, {"qwen3-coder","qwen3-coder","⚙"} }
 local mi = 1
@@ -48,11 +50,22 @@ widget.Title="Cortex"
 button.Click:Connect(function() widget.Enabled=not widget.Enabled end)
 
 local root=new("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=C.bg,BorderSizePixel=0},widget)
+stk(root, C.line, 2) -- crimson pixel frame
+-- pixel corner brackets (RED UI style)
+local function bracket(cx, cy)
+	local hx = (cx==0) and 6 or -20
+	local hy = (cy==0) and 6 or -9
+	local vx = (cx==0) and 6 or -9
+	local vy = (cy==0) and 6 or -20
+	new("Frame",{Size=UDim2.new(0,14,0,3),Position=UDim2.new(cx,hx,cy,hy),BackgroundColor3=C.accent,BorderSizePixel=0,ZIndex=10},root)
+	new("Frame",{Size=UDim2.new(0,3,0,14),Position=UDim2.new(cx,vx,cy,vy),BackgroundColor3=C.accent,BorderSizePixel=0,ZIndex=10},root)
+end
+bracket(0,0); bracket(1,0); bracket(0,1); bracket(1,1)
 
 -- header (sharp pixel bar)
 local head=new("Frame",{Size=UDim2.new(1,0,0,46),BackgroundColor3=C.panel,BorderSizePixel=0},root)
 new("Frame",{Size=UDim2.new(1,0,0,2),Position=UDim2.new(0,0,1,-2),BackgroundColor3=C.accent,BorderSizePixel=0},head)
-label({Size=UDim2.new(0,180,1,0),Position=UDim2.new(0,14,0,0),Text="🤖 CORTEX",TextSize=16,TextColor3=C.text},head)
+label({Size=UDim2.new(0,200,1,0),Position=UDim2.new(0,14,0,0),Text="CORTEX",Font=FP,TextSize=22,TextColor3=C.accent},head)
 local modelBtn=new("TextButton",{Size=UDim2.new(0,120,0,28),Position=UDim2.new(1,-134,0.5,-14),
 	BackgroundColor3=C.panel2,BorderSizePixel=0,AutoButtonColor=false,Text=""},head)
 stk(modelBtn,C.line)
