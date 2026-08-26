@@ -1,13 +1,12 @@
 --!nonstrict
 --[[
-	Cortex — AI code editor for Roblox Studio (working prototype)
+	Cortex — AI builder for Roblox Studio (working prototype)
 
-	Dead simple: select a script in the Explorer, type what you want changed,
-	hit Send. Cortex reads the script, asks a frontier model, and writes the
-	change straight back into the script. Undo any edit with Ctrl+Z.
+	Type what you want done in your place, hit send. Cortex turns it into Luau
+	and RUNS it in Studio — create parts, change properties, edit scripts, spawn
+	NPCs, whatever. Undo anything with Ctrl+Z.
 
-	No setup, no commands — it just works.
-
+	No setup, no commands. Just works.
 	INSTALL: Plugins tab → "Plugins Folder" → drop the .rbxmx there → restart Studio.
 ]]
 
@@ -18,102 +17,115 @@ local CHS         = game:GetService("ChangeHistoryService")
 local BASE = "https://osa-api.netlify.app/npc"
 local KEY  = "CORTEX_KEY_PLACEHOLDER"
 
+-- high-contrast palette (bright text on solid dark)
 local C = {
-	bg="0c0b0a", rail="0a0908", panel="0f0e0d", panel2="171310",
-	line="2e2820", lineS="241e18", text="f4f0ea", muted="b0a597",
-	muted2="8b8072", accent="f5883d", ok="a0c194", err="d98a7e",
+	bg="0d0c0b", panel="17140f", panel2="221c15", line="3a3226",
+	text="fbf8f3", sub="d8cdba", muted="a99d89", accent="ff9243",
+	ok="a6e08f", err="ff7b6b",
 }
 for k,v in pairs(C) do C[k]=Color3.fromHex(v) end
 local SANS   = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium)
 local SANS_B = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold)
 local MONO   = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.SemiBold)
 
--- {display, gateway tier}. Defaults to GPT-5 (verified working).
 local MODELS = { {"GPT-5","gpt-5"}, {"Claude","claude"}, {"Qwen3-Coder","qwen3-coder"} }
 local mi = 1
 
--- ---------- helpers ----------
 local function new(cls,props,parent)
 	local o=Instance.new(cls); for k,v in pairs(props or {}) do o[k]=v end
 	if parent then o.Parent=parent end; return o
 end
 local function corner(o,r) new("UICorner",{CornerRadius=UDim.new(0,r)},o) end
-local function strokeIt(o,col) new("UIStroke",{Color=col or C.line,Thickness=1},o) end
+local function stk(o,col) new("UIStroke",{Color=col or C.line,Thickness=1},o) end
 local function pad(o,t,b,l,r) new("UIPadding",{PaddingTop=UDim.new(0,t),PaddingBottom=UDim.new(0,b or t),PaddingLeft=UDim.new(0,l or t),PaddingRight=UDim.new(0,r or l or t)},o) end
 
--- ---------- dock ----------
 local toolbar = plugin:CreateToolbar("Cortex")
-local button  = toolbar:CreateButton("Cortex","AI code editor","")
+local button  = toolbar:CreateButton("Cortex","AI builder for Studio","")
 local info = DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Right,true,false,400,560,300,380)
-local widget = plugin:CreateDockWidgetPluginGui("CortexAI_v2", info)
+local widget = plugin:CreateDockWidgetPluginGui("CortexAI_v3", info)
 widget.Title = "Cortex"
 button.Click:Connect(function() widget.Enabled = not widget.Enabled end)
 
 local root = new("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=C.bg,BorderSizePixel=0}, widget)
 
--- header: brand + model cycle
-local head = new("Frame",{Size=UDim2.new(1,0,0,46),BackgroundColor3=C.panel,BorderSizePixel=0}, root)
+-- header
+local head = new("Frame",{Size=UDim2.new(1,0,0,48),BackgroundColor3=C.panel,BorderSizePixel=0}, root)
 new("Frame",{Size=UDim2.new(1,0,0,1),Position=UDim2.new(0,0,1,-1),BackgroundColor3=C.line,BorderSizePixel=0}, head)
-new("TextLabel",{Size=UDim2.new(0,120,1,0),Position=UDim2.new(0,16,0,0),BackgroundTransparency=1,
-	RichText=true,Text='<font color="#f5883d">◆</font>  Cortex',FontFace=SANS_B,TextSize=15,TextColor3=C.text,
+new("TextLabel",{Size=UDim2.new(0,140,1,0),Position=UDim2.new(0,16,0,0),BackgroundTransparency=1,
+	RichText=true,Text='<font color="#ff9243">◆</font>  Cortex',FontFace=SANS_B,TextSize=16,TextColor3=C.text,
 	TextXAlignment=Enum.TextXAlignment.Left}, head)
-local modelBtn = new("TextButton",{Size=UDim2.new(0,120,0,28),Position=UDim2.new(1,-136,0.5,-14),
-	BackgroundColor3=C.panel2,BorderSizePixel=0,AutoButtonColor=false,Text="",}, head)
-corner(modelBtn,8); strokeIt(modelBtn,C.line)
-local modelTxt = new("TextLabel",{Size=UDim2.new(1,-16,1,0),Position=UDim2.new(0,10,0,0),BackgroundTransparency=1,
-	FontFace=SANS,TextSize=12,TextColor3=C.muted,TextXAlignment=Enum.TextXAlignment.Left,Text=""}, modelBtn)
-local function refreshModel() modelTxt.Text = MODELS[mi][1].."   ▾" end
-refreshModel()
-modelBtn.MouseButton1Click:Connect(function() mi=(mi%#MODELS)+1; refreshModel() end)
+local modelBtn = new("TextButton",{Size=UDim2.new(0,122,0,30),Position=UDim2.new(1,-138,0.5,-15),
+	BackgroundColor3=C.panel2,BorderSizePixel=0,AutoButtonColor=false,Text=""}, head)
+corner(modelBtn,8); stk(modelBtn,C.line)
+local modelTxt=new("TextLabel",{Size=UDim2.new(1,-16,1,0),Position=UDim2.new(0,10,0,0),BackgroundTransparency=1,
+	FontFace=SANS,TextSize=13,TextColor3=C.sub,TextXAlignment=Enum.TextXAlignment.Left,Text=""}, modelBtn)
+local function refM() modelTxt.Text=MODELS[mi][1].."   ▾" end; refM()
+modelBtn.MouseButton1Click:Connect(function() mi=(mi%#MODELS)+1; refM() end)
 
--- output log
-local logF = new("ScrollingFrame",{Size=UDim2.new(1,0,1,-46-84),Position=UDim2.new(0,0,0,46),
-	BackgroundColor3=C.bg,BorderSizePixel=0,ScrollBarThickness=4,ScrollBarImageColor3=C.line,
+-- log
+local logF=new("ScrollingFrame",{Size=UDim2.new(1,0,1,-48-88),Position=UDim2.new(0,0,0,48),
+	BackgroundColor3=C.bg,BorderSizePixel=0,ScrollBarThickness=5,ScrollBarImageColor3=C.line,
 	CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y}, root)
-pad(logF,16,10,16,16)
-new("UIListLayout",{Padding=UDim.new(0,7),SortOrder=Enum.SortOrder.LayoutOrder}, logF)
+pad(logF,16,12,16,16)
+local lay=new("UIListLayout",{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder}, logF)
 local ord=0
-local function line(text,color,mono)
+local function line(text,color,mono,size)
 	ord+=1
-	return new("TextLabel",{Size=UDim2.new(1,0,0,0),AutomaticSize=Enum.AutomaticSize.Y,BackgroundTransparency=1,
-		FontFace=mono and MONO or SANS,TextSize=13,TextColor3=color or C.muted,TextWrapped=true,
+	local l=new("TextLabel",{Size=UDim2.new(1,0,0,0),AutomaticSize=Enum.AutomaticSize.Y,BackgroundTransparency=1,
+		FontFace=mono and MONO or SANS,TextSize=size or 14,TextColor3=color or C.sub,TextWrapped=true,
 		TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top,Text=text,LayoutOrder=ord}, logF)
+	task.defer(function() logF.CanvasPosition=Vector2.new(0, lay.AbsoluteContentSize.Y) end)
+	return l
 end
 
--- input bar
-local bar = new("Frame",{Size=UDim2.new(1,0,0,84),Position=UDim2.new(0,0,1,-84),BackgroundColor3=C.panel,BorderSizePixel=0}, root)
+-- input
+local bar=new("Frame",{Size=UDim2.new(1,0,0,88),Position=UDim2.new(0,0,1,-88),BackgroundColor3=C.panel,BorderSizePixel=0}, root)
 new("Frame",{Size=UDim2.new(1,0,0,1),BackgroundColor3=C.line,BorderSizePixel=0}, bar)
 pad(bar,14,14,16,16)
-local field = new("Frame",{Size=UDim2.new(1,0,1,0),BackgroundColor3=C.panel2,BorderSizePixel=0}, bar)
-corner(field,12); local fs=Instance.new("UIStroke"); fs.Color=C.line; fs.Parent=field
-local box = new("TextBox",{Size=UDim2.new(1,-58,1,0),Position=UDim2.new(0,12,0,0),BackgroundTransparency=1,
-	TextColor3=C.text,PlaceholderColor3=C.muted2,PlaceholderText="Describe a change to the selected script…",
-	FontFace=SANS,TextSize=13,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top,
+local field=new("Frame",{Size=UDim2.new(1,0,1,0),BackgroundColor3=C.panel2,BorderSizePixel=0}, bar)
+corner(field,12); local fs=Instance.new("UIStroke"); fs.Color=C.line; fs.Thickness=1; fs.Parent=field
+local box=new("TextBox",{Size=UDim2.new(1,-60,1,-16),Position=UDim2.new(0,12,0,8),BackgroundTransparency=1,
+	TextColor3=C.text,PlaceholderColor3=C.muted,PlaceholderText="Tell Cortex what to build or change…",
+	FontFace=SANS,TextSize=14,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top,
 	MultiLine=true,ClearTextOnFocus=false,TextWrapped=true,Text=""}, field)
-box.Focused:Connect(function() fs.Color=C.muted2 end)
+box.Focused:Connect(function() fs.Color=C.accent end)
 box.FocusLost:Connect(function() fs.Color=C.line end)
-local send = new("TextButton",{Size=UDim2.new(0,38,0,38),Position=UDim2.new(1,-46,0.5,-19),
-	BackgroundColor3=C.accent,BorderSizePixel=0,AutoButtonColor=true,Text="↑",
-	FontFace=SANS_B,TextSize=17,TextColor3=Color3.fromHex("2a1002")}, field)
+local send=new("TextButton",{Size=UDim2.new(0,40,0,40),Position=UDim2.new(1,-48,0.5,-20),
+	BackgroundColor3=C.accent,BorderSizePixel=0,AutoButtonColor=true,Text="↑",FontFace=SANS_B,TextSize=19,
+	TextColor3=Color3.fromHex("2a1400")}, field)
 corner(send,10)
 
 -- ---------- logic ----------
-local function selectedScript()
-	for _,i in ipairs(Selection:Get()) do if i:IsA("LuaSourceContainer") then return i end end
+local function sel()
+	local s=Selection:Get()[1]
+	return s
 end
-local function extractCode(r)
+local function code_of(r)
 	if not r then return nil end
 	return r:match("```lua%s*\n(.-)```") or r:match("```luau%s*\n(.-)```") or r:match("```%s*\n(.-)```")
 end
+local function runLua(src)
+	if loadstring then
+		local fn=loadstring(src)
+		if fn then return pcall(fn) end
+	end
+	local ms=Instance.new("ModuleScript")
+	ms.Name="CortexRun"
+	ms.Source=src.."\nreturn true"
+	ms.Parent=game:GetService("ServerStorage")
+	local ok,res=pcall(require,ms)
+	pcall(function() ms:Destroy() end)
+	return ok,res
+end
 local function ask(system,text)
-	local ok,res = pcall(function()
+	local ok,res=pcall(function()
 		return HttpService:RequestAsync({Url=BASE,Method="POST",
 			Headers={["Content-Type"]="application/json",["Authorization"]="Bearer "..KEY},
 			Body=HttpService:JSONEncode({system=system,text=text,tier=MODELS[mi][2]})})
 	end)
-	if not ok then return nil,"no connection (allow HTTP for the plugin)" end
-	if not res.Success then return nil,"gateway "..tostring(res.StatusCode) end
-	local g,d = pcall(function() return HttpService:JSONDecode(res.Body) end)
+	if not ok then return nil,"no HTTP — enable it: Game Settings › Security, or click Allow on the plugin's HTTP prompt" end
+	if not res.Success then return nil,"gateway error "..tostring(res.StatusCode) end
+	local g,d=pcall(function() return HttpService:JSONDecode(res.Body) end)
 	if not g then return nil,"bad response" end
 	if d.error then return nil,tostring(type(d.error)=="table" and d.error.message or d.error) end
 	return d.text
@@ -122,41 +134,45 @@ end
 local busy=false
 local function run()
 	if busy then return end
-	local req = box.Text
+	local req=box.Text
 	if #req==0 then return end
-	local scr = selectedScript()
-	if not scr then line("Select a script in the Explorer first, then try again.",C.accent); return end
-
 	busy=true; box.Text=""; send.Text="…"
 	line("› "..req, C.text)
-	line("reading "..scr.Name.." · "..MODELS[mi][1].."…", C.muted, true)
+
+	local s=sel()
+	local ctx="Nothing is selected."
+	if s then
+		ctx="Selected: "..s:GetFullName().." ("..s.ClassName..")"
+		if s:IsA("LuaSourceContainer") then ctx=ctx.."\nIts source:\n"..s.Source end
+	end
+	line("working · "..MODELS[mi][1].."…", C.muted, false, 13)
 
 	task.spawn(function()
-		local system = "You are Cortex, an expert Roblox Luau engineer editing a script inside Studio. "
-			.."Apply the user's request to the script below and return the COMPLETE updated script in a single ```lua code block. "
-			.."Keep existing behaviour intact unless asked. No explanation outside the code block.\n\n"
-			.."-- "..scr.Name.." --\n"..scr.Source
-		local reply,e = ask(system, req)
+		local system = "You are Cortex, an AI that edits a Roblox place from inside Studio as a plugin. "
+			.."Convert the user's request into a Luau snippet that performs it when run (you may create or modify Instances "
+			.."anywhere — workspace, ServerScriptService, etc. — set properties, and set a Script's .Source). "
+			.."Return ONLY the Luau in a single ```lua code block, no words outside it. Keep it safe and idempotent where possible.\n\n"..ctx
+		local reply,e=ask(system,req)
 		if not reply then
-			line("couldn't do it: "..tostring(e), C.err, true)
+			line("✗ "..tostring(e), C.err, false)
 		else
-			local code = extractCode(reply)
+			local code=code_of(reply)
 			if code and #code>0 then
-				local rec = CHS:TryBeginRecording("Cortex: "..req:sub(1,40))
-				scr.Source = code
-				if rec then CHS:FinishRecording(rec, Enum.FinishRecordingOperation.Commit) end
-				line("✓ done — updated "..scr.Name..". Press Play to test. (Ctrl+Z to undo)", C.ok, true)
+				local rec=CHS:TryBeginRecording("Cortex: "..req:sub(1,40))
+				local ok,err=runLua(code)
+				if rec then CHS:FinishRecording(rec, ok and Enum.FinishRecordingOperation.Commit or Enum.FinishRecordingOperation.Cancel) end
+				if ok then line("✓ done. Ctrl+Z to undo.", C.ok)
+				else line("✗ ran into an error: "..tostring(err), C.err, true, 12) end
 			else
-				line(reply, C.muted, true)
+				line(reply, C.sub)
 			end
 		end
 		busy=false; send.Text="↑"
 	end)
 end
 send.MouseButton1Click:Connect(run)
-box.FocusLost:Connect(function(enter) if enter then run() end end)
 
 -- greeting
-line("Cortex — AI code editor.", C.text)
-line("Select a script in the Explorer, describe a change, and hit send. It edits the script for you.", C.muted)
-if KEY:sub(1,4) ~= "osa-" then line("(repo version — no key baked; grab the ready build)", C.accent, true) end
+line("Cortex — tell me what to build.", C.text)
+line("Examples: “create a red glowing part above spawn”, “make the selected script print hello”, “add a killbrick”.", C.sub)
+if KEY:sub(1,4) ~= "osa-" then line("(repo build — no key baked)", C.accent) end
