@@ -25,7 +25,9 @@ local C = {
 	muted2= Color3.fromHex("8b8072"), accent= Color3.fromHex("f5883d"),
 	add   = Color3.fromHex("a0c194"), del   = Color3.fromHex("cf8d81"),
 }
-local MONO, SANS = Enum.Font.Code, Enum.Font.Gotham
+local SANS   = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium)
+local SANS_B = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold)
+local MONO   = Font.new("rbxasset://fonts/families/RobotoMono.json", Enum.FontWeight.SemiBold)
 
 -- {display name, unit cost, gateway frontier tier}
 local MODELS = {
@@ -47,7 +49,7 @@ local function corner(o,r) new("UICorner",{CornerRadius=UDim.new(0,r)},o) end
 local function strokeIt(o,col,t) new("UIStroke",{Color=col or C.line,Thickness=t or 1},o) end
 local function padAll(o,t,b,l,r) new("UIPadding",{PaddingTop=UDim.new(0,t),PaddingBottom=UDim.new(0,b or t),PaddingLeft=UDim.new(0,l or t),PaddingRight=UDim.new(0,r or l or t)},o) end
 local function lbl(props, parent)
-	local d = {BackgroundTransparency=1, Font=SANS, TextSize=13, TextColor3=C.text,
+	local d = {BackgroundTransparency=1, FontFace=SANS, TextSize=13, TextColor3=C.text,
 		TextXAlignment=Enum.TextXAlignment.Left, TextYAlignment=Enum.TextYAlignment.Center}
 	for k,v in pairs(props) do d[k]=v end
 	return new("TextLabel", d, parent)
@@ -77,7 +79,7 @@ new("Frame",{Size=UDim2.new(0,1,1,0),Position=UDim2.new(1,-1,0,0),BackgroundColo
 -- brand
 local brand = new("Frame",{Size=UDim2.new(1,0,0,50),BackgroundTransparency=1}, rail)
 padAll(brand,17,14,18,18)
-lbl({Size=UDim2.fromScale(1,1),Text='<font color="#f5883d">◆</font>  Cortex',RichText=true,Font=Enum.Font.GothamBold,TextSize=15,TextColor3=C.text}, brand)
+lbl({Size=UDim2.fromScale(1,1),Text='<font color="#f5883d">◆</font>  Cortex',RichText=true,FontFace=SANS_B,TextSize=15,TextColor3=C.text}, brand)
 lbl({Size=UDim2.new(0,40,1,0),Position=UDim2.new(1,-46,0,0),Text="beta",TextSize=10,TextColor3=C.muted2,
 	TextXAlignment=Enum.TextXAlignment.Right}, brand)
 
@@ -131,7 +133,7 @@ corner(barBg,2)
 local barFill = new("Frame",{Size=UDim2.new(0.62,0,1,0),BackgroundColor3=C.accent,BackgroundTransparency=0.35,BorderSizePixel=0}, barBg)
 corner(barFill,2)
 local upg = new("TextButton",{Size=UDim2.new(1,0,0,30),Position=UDim2.new(0,0,0,40),BackgroundColor3=C.rail,
-	BorderSizePixel=0,AutoButtonColor=false,Text="Upgrade",Font=SANS,TextSize=12,TextColor3=C.muted}, foot)
+	BorderSizePixel=0,AutoButtonColor=false,Text="Upgrade",FontFace=SANS,TextSize=12,TextColor3=C.muted}, foot)
 corner(upg,8); strokeIt(upg,C.line)
 
 -- ===================== MAIN =================================================
@@ -156,7 +158,7 @@ local ord=0
 local function ln(text,color,mono,order)
 	ord+=1
 	return lbl({Size=UDim2.new(1,0,0,0),AutomaticSize=Enum.AutomaticSize.Y,Text=text,
-		TextColor3=color or C.muted,Font=mono and MONO or SANS,TextSize=13,TextWrapped=true,
+		TextColor3=color or C.muted,FontFace=mono and MONO or SANS,TextSize=13,TextWrapped=true,
 		TextYAlignment=Enum.TextYAlignment.Top,LayoutOrder=order or ord}, stream)
 end
 local function bubble(text)
@@ -175,7 +177,7 @@ local function divider(ts)
 	local d=new("Frame",{Size=UDim2.new(1,0,0,20),BackgroundTransparency=1,LayoutOrder=ord}, stream)
 	new("Frame",{Size=UDim2.new(0.42,0,0,1),Position=UDim2.new(0,0,0.5,0),BackgroundColor3=C.lineS,BorderSizePixel=0}, d)
 	new("Frame",{Size=UDim2.new(0.42,0,0,1),Position=UDim2.new(1,0,0.5,0),AnchorPoint=Vector2.new(1,0),BackgroundColor3=C.lineS,BorderSizePixel=0}, d)
-	lbl({Size=UDim2.fromScale(1,1),Text=ts,Font=MONO,TextSize=10,TextColor3=C.muted2,
+	lbl({Size=UDim2.fromScale(1,1),Text=ts,FontFace=MONO,TextSize=10,TextColor3=C.muted2,
 		TextXAlignment=Enum.TextXAlignment.Center}, d)
 end
 
@@ -187,7 +189,7 @@ local field = new("Frame",{Size=UDim2.new(1,0,0,40),BackgroundColor3=C.panel2,Bo
 corner(field,12); local fStroke=Instance.new("UIStroke"); fStroke.Color=C.line; fStroke.Parent=field
 local box = new("TextBox",{Size=UDim2.new(1,-24,1,0),Position=UDim2.new(0,12,0,0),BackgroundTransparency=1,
 	TextColor3=C.text,PlaceholderColor3=C.muted2,PlaceholderText="Ask Cortex to build or fix something…",
-	Font=SANS,TextSize=13,TextXAlignment=Enum.TextXAlignment.Left,ClearTextOnFocus=false,Text=""}, field)
+	FontFace=SANS,TextSize=13,TextXAlignment=Enum.TextXAlignment.Left,ClearTextOnFocus=false,Text=""}, field)
 box.Focused:Connect(function() fStroke.Color=C.muted2 end)
 box.FocusLost:Connect(function() fStroke.Color=C.line end)
 
@@ -200,7 +202,7 @@ refreshModel()
 modelBtn.MouseButton1Click:Connect(function() modelIndex=(modelIndex%#MODELS)+1; refreshModel() end)
 
 local send = new("TextButton",{Size=UDim2.new(0,32,0,28),Position=UDim2.new(1,-32,0,52),BackgroundColor3=C.accent,
-	BorderSizePixel=0,AutoButtonColor=true,Text="↑",Font=Enum.Font.GothamBold,TextSize=16,TextColor3=Color3.fromHex("2a1002")}, ibar)
+	BorderSizePixel=0,AutoButtonColor=true,Text="↑",FontFace=SANS_B,TextSize=16,TextColor3=Color3.fromHex("2a1002")}, ibar)
 corner(send,8)
 
 -- hover tweens (replace CSS transitions)
