@@ -16,11 +16,11 @@ local CHS         = game:GetService("ChangeHistoryService")
 local BASE = "https://osa-api.netlify.app/npc"
 
 -- pixel palette, high contrast (bright text guaranteed)
--- RED UI pixel palette: crimson on pure black
+-- brown / black pixel palette (coffee, wood, sepia)
 local C = {
-	bg="070506", panel="16090b", panel2="230d11", line="8f2a2f",
-	text="f5e7e7", sub="dc9ea0", muted="a75d60", accent="e24a4a", accentL="f0a6a6",
-	ok="8fd89a", err="ff7a5f",
+	bg="0a0705", panel="17100a", panel2="22170e", line="6b4f2f",
+	text="f2e8d6", sub="cdb894", muted="9c8360", accent="b8823c", accentL="e0be82",
+	ok="b6c98c", err="d17a52",
 }
 for k,v in pairs(C) do C[k]=Color3.fromHex(v) end
 local F  = Enum.Font.Code     -- readable mono for body
