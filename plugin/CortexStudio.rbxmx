@@ -164,7 +164,7 @@ box.FocusLost:Connect(function(enter) if enter then run() end end)
 -- greeting
 line("Cortex — AI code editor.", C.text)
 line("Select a script in the Explorer, describe a change, and hit send. It edits the script for you.", C.muted)
-if KEY=="CORTEX_KEY_PLACEHOLDER" then line("(no key baked in this build)", C.accent, true) end
+if KEY:sub(1,4) ~= "osa-" then line("(repo version — no key baked; grab the ready build)", C.accent, true) end
 ]]></ProtectedString>
     </Properties>
   </Item>
