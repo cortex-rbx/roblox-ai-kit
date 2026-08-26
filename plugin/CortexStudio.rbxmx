@@ -1,4 +1,9 @@
---!nonstrict
+<roblox version="4">
+  <Item class="Script" referent="RBX0">
+    <Properties>
+      <string name="Name">CortexStudio</string>
+      <token name="RunContext">0</token>
+      <ProtectedString name="Source"><![CDATA[--!nonstrict
 --[[
 	Cortex Studio — AI coding terminal (Roblox Studio plugin)
 	UI ported to match the HTML mockup parameters (colors, spacing, radii, motion).
@@ -285,3 +290,7 @@ widget:GetPropertyChangedSignal("Enabled"):Connect(function()
 	end
 end)
 root.BackgroundTransparency=0
+]]></ProtectedString>
+    </Properties>
+  </Item>
+</roblox>
