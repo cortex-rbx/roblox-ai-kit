@@ -27,7 +27,13 @@ local C = {
 }
 local MONO, SANS = Enum.Font.Code, Enum.Font.Gotham
 
-local MODELS = { {"Claude Sonnet 5",4},{"Claude Opus 4.8",10},{"GPT-5",6},{"Qwen3-Coder 480B",1} }
+-- {display name, unit cost, gateway frontier tier}
+local MODELS = {
+	{"Claude Sonnet 5",4,"claude-sonnet-5"},
+	{"Claude Opus 4.8",10,"claude-opus-4-8"},
+	{"GPT-5",6,"gpt-5"},
+	{"Qwen3-Coder 480B",1,"qwen3-coder"},
+}
 local modelIndex = 1
 
 -- ---------- helpers ----------------------------------------------------------
@@ -221,7 +227,7 @@ local function callCortex(system,text)
 	local key=getKey(); if not key or #key==0 then return nil,"no-key" end
 	local ok,res=pcall(function() return HttpService:RequestAsync({Url=BASE,Method="POST",
 		Headers={["Content-Type"]="application/json",["Authorization"]="Bearer "..key},
-		Body=HttpService:JSONEncode({system=system,text=text,tier="osa-smart"})}) end)
+		Body=HttpService:JSONEncode({system=system,text=text,tier=MODELS[modelIndex][3] or "osa-smart"})}) end)
 	if not ok then return nil,"net" end
 	if not res.Success then return nil,"HTTP "..tostring(res.StatusCode) end
 	local g,d=pcall(function() return HttpService:JSONDecode(res.Body) end)
