@@ -6,12 +6,14 @@
 	INSTALL: Plugins tab → "Plugins Folder" → drop the .rbxmx → restart Studio.
 ]]
 
+-- Loaded and run by the Cortex loader as: return function(plugin, KEY) ... end
+return function(plugin, KEY)
+
 local HttpService = game:GetService("HttpService")
 local Selection   = game:GetService("Selection")
 local CHS         = game:GetService("ChangeHistoryService")
 
 local BASE = "https://osa-api.netlify.app/npc"
-local KEY  = "CORTEX_KEY_PLACEHOLDER"
 
 -- pixel palette, high contrast (bright text guaranteed)
 local C = {
@@ -157,3 +159,5 @@ send.MouseButton1Click:Connect(run)
 line("🤖 Cortex ready.", C.text, 15)
 line("Tell me what to build. Try: create a red glowing part above spawn", C.sub)
 if KEY:sub(1,4)~="osa-" then line("⚠ repo build — no key baked", C.accent) end
+
+end
