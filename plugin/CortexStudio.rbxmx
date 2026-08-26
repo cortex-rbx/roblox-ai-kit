@@ -276,19 +276,13 @@ hover(newBtn,newBtn:FindFirstChildOfClass("UIStroke"),newBtn:FindFirstChildOfCla
 hover(upg,upg:FindFirstChildOfClass("UIStroke"),upg)
 hover(modelBtn,modelBtn:FindFirstChildOfClass("UIStroke"),modelTxt)
 
--- ===================== seed demo (matches the mockup on open) ===============
-bubble("give the shopkeeper an idle wave animation")
-ln("· edit Shopkeeper.server.lua   +9 −0",C.muted,true)
-ln("✓ done",C.add,true)
-ln("6.3s   ·   2 agents",C.muted2,true)
-divider("22:54")
-bubble("make the shopkeeper NPC greet players by name when they walk up")
-ln("· read ServerScriptService › Shopkeeper.server.lua",C.muted,true)
-ln("prompt.Triggered:Connect(function(player)\n  npc.Head.Dialog:Say(\"Welcome, \"..player.DisplayName..\"!\")\nend)",C.muted2,true)
-ln("· edit Shopkeeper.server.lua   +4 −1",C.muted,true)
-ln("· add ProximityPrompt → Shopkeeper.Head",C.muted,true)
-ln("✓ done · press Play to test",C.add,true)
-ln("12.4s   ·   3 agents",C.muted2,true)
+-- ===================== greeting (working prototype) =========================
+ln("Cortex ready.",C.text,false)
+ln("1. connect:  /key YOUR_KEY",C.muted,true)
+ln("2. select a script in the Explorer",C.muted,true)
+ln("3. describe a change, then hit send",C.muted,true)
+ln("apply the result with  /apply  ·  clear with  /new",C.muted2,true)
+if getKey() then ln("· key set — ready",C.add,true) else ln("· no key yet — /key to connect",C.accent,true) end
 
 -- fade the whole panel in (replaces CSS load animation)
 widget:GetPropertyChangedSignal("Enabled"):Connect(function()
