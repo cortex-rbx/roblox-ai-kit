@@ -19,11 +19,11 @@ local BASE = "https://osa-api.netlify.app/npc"
 -- ---------- tokens (exact hex from the mockup) ------------------------------
 local C = {
 	bg    = Color3.fromHex("0c0b0a"), rail  = Color3.fromHex("0a0908"),
-	panel = Color3.fromHex("0f0e0d"), panel2= Color3.fromHex("141210"),
-	line  = Color3.fromHex("211d19"), lineS = Color3.fromHex("1a1614"),
-	text  = Color3.fromHex("e9e5e0"), muted = Color3.fromHex("7c766e"),
-	muted2= Color3.fromHex("4f4a44"), accent= Color3.fromHex("c9743f"),
-	add   = Color3.fromHex("8a9b82"), del   = Color3.fromHex("9b7a76"),
+	panel = Color3.fromHex("0f0e0d"), panel2= Color3.fromHex("171310"),
+	line  = Color3.fromHex("2e2820"), lineS = Color3.fromHex("241e18"),
+	text  = Color3.fromHex("f4f0ea"), muted = Color3.fromHex("b0a597"),
+	muted2= Color3.fromHex("8b8072"), accent= Color3.fromHex("f5883d"),
+	add   = Color3.fromHex("a0c194"), del   = Color3.fromHex("cf8d81"),
 }
 local MONO, SANS = Enum.Font.Code, Enum.Font.Gotham
 
@@ -77,7 +77,7 @@ new("Frame",{Size=UDim2.new(0,1,1,0),Position=UDim2.new(1,-1,0,0),BackgroundColo
 -- brand
 local brand = new("Frame",{Size=UDim2.new(1,0,0,50),BackgroundTransparency=1}, rail)
 padAll(brand,17,14,18,18)
-lbl({Size=UDim2.fromScale(1,1),Text="◆  Cortex",Font=Enum.Font.GothamMedium,TextSize=14,TextColor3=C.text}, brand)
+lbl({Size=UDim2.fromScale(1,1),Text='<font color="#f5883d">◆</font>  Cortex',RichText=true,Font=Enum.Font.GothamBold,TextSize=15,TextColor3=C.text}, brand)
 lbl({Size=UDim2.new(0,40,1,0),Position=UDim2.new(1,-46,0,0),Text="beta",TextSize=10,TextColor3=C.muted2,
 	TextXAlignment=Enum.TextXAlignment.Right}, brand)
 
@@ -85,7 +85,7 @@ lbl({Size=UDim2.new(0,40,1,0),Position=UDim2.new(1,-46,0,0),Text="beta",TextSize
 local newBtn = new("TextButton",{Size=UDim2.new(1,-24,0,34),Position=UDim2.new(0,12,0,50),
 	BackgroundColor3=C.rail,BorderSizePixel=0,AutoButtonColor=false,Text="",}, rail)
 corner(newBtn,9); strokeIt(newBtn,C.line)
-lbl({Size=UDim2.fromScale(1,1),Position=UDim2.new(0,11,0,0),Text="+   New session",TextSize=13,TextColor3=C.muted}, newBtn)
+lbl({Size=UDim2.fromScale(1,1),Position=UDim2.new(0,11,0,0),Text='<font color="#f5883d">+</font>   New session',RichText=true,TextSize=13,TextColor3=C.text}, newBtn)
 
 lbl({Size=UDim2.new(1,0,0,20),Position=UDim2.new(0,18,0,90),Text="SESSIONS",TextSize=10,TextColor3=C.muted2}, rail)
 
@@ -142,7 +142,7 @@ local head = new("Frame",{Size=UDim2.new(1,0,0,48),BackgroundTransparency=1}, ma
 hline(head,C.lineS)
 padAll(head,0,0,20,20)
 lbl({Size=UDim2.new(1,-40,1,0),Text="Shopkeeper greets by name",TextSize=13,TextColor3=C.text}, head)
-lbl({Size=UDim2.new(0,30,1,0),Position=UDim2.new(1,-30,0,0),Text="⚙",TextSize=15,TextColor3=C.muted2,
+lbl({Size=UDim2.new(0,30,1,0),Position=UDim2.new(1,-30,0,0),Text="⚙",TextSize=18,TextColor3=C.muted,
 	TextXAlignment=Enum.TextXAlignment.Right}, head)
 
 -- stream
@@ -199,9 +199,9 @@ local function refreshModel() modelTxt.Text = MODELS[modelIndex][1].."   "..MODE
 refreshModel()
 modelBtn.MouseButton1Click:Connect(function() modelIndex=(modelIndex%#MODELS)+1; refreshModel() end)
 
-local send = new("TextButton",{Size=UDim2.new(0,30,0,28),Position=UDim2.new(1,-30,0,52),BackgroundColor3=C.panel,
-	BorderSizePixel=0,AutoButtonColor=false,Text="↑",Font=Enum.Font.GothamBold,TextSize=14,TextColor3=C.accent}, ibar)
-corner(send,8); strokeIt(send,C.line)
+local send = new("TextButton",{Size=UDim2.new(0,32,0,28),Position=UDim2.new(1,-32,0,52),BackgroundColor3=C.accent,
+	BorderSizePixel=0,AutoButtonColor=true,Text="↑",Font=Enum.Font.GothamBold,TextSize=16,TextColor3=Color3.fromHex("2a1002")}, ibar)
+corner(send,8)
 
 -- hover tweens (replace CSS transitions)
 local function hover(btnObj, strokeObj, txtObj)
