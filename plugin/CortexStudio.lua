@@ -12,7 +12,9 @@ local HttpService = game:GetService("HttpService")
 local Selection   = game:GetService("Selection")
 local CHS         = game:GetService("ChangeHistoryService")
 
-local BASE = "https://osa-api.netlify.app/npc"
+-- Прямой endpoint вала, а не osa-api.netlify.app: Netlify-прокси рубит на ~26с,
+-- а reasoning-модели (Fable 5 / GPT-5.6 Sol) думают дольше. Прямой вал терпит.
+local BASE = "https://alishergiyasov100boop--280269849ac811f18ca91607ee4eb77e.web.val.run/npc"
 
 -- тёплый коричнево-чёрный, один янтарный акцент (стиль Claude Code)
 local C = {
