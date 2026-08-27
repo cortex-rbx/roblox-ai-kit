@@ -27,7 +27,7 @@ local F = Enum.Font.Code  -- моноширинный — терминал
 local HEX = { accent="#d98a3d", ok="#a8c47f", dim="#9c8b76", faint="#5f5140",
 	text="#e9e0d2", user="#e0be82", err="#d17a52" }
 
-local MODELS = { {"claude","claude","◍"}, {"gpt-5","gpt-5","◍"}, {"qwen3-coder","qwen3-coder","◍"} }
+local MODELS = { {"Fable 5","fable-5","◍"}, {"GPT-5.6 Sol","gpt-5.6-sol","◍"} }
 local mi = 1
 
 local function new(cls,props,parent)
