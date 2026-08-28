@@ -18,9 +18,9 @@ local BASE = "https://alishergiyasov100boop--280269849ac811f18ca91607ee4eb77e.we
 
 -- тёплый коричнево-чёрный, один янтарный акцент (стиль Claude Code)
 local C = {
-	bg="100c09", panel="17120d", rail="1e1710",
+	bg="000000", panel="17120d", rail="1e1710",
 	text="e9e0d2", dim="9c8b76", faint="5f5140", line="2a2118",
-	accent="d98a3d", accentD="a8794a", ok="a8c47f", err="d17a52", user="e0be82",
+	accent="ffffff", accentD="b8b8b8", ok="00ff00", err="d17a52", user="ffffff",
 }
 for k,v in pairs(C) do C[k]=Color3.fromHex(v) end
 local F = Enum.Font.Code  -- моноширинный — терминал
