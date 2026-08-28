@@ -37,6 +37,11 @@ local MODELS = {
 	{"DeepSeek V4","deepseek-v4-pro","◍"},
 	{"Qwen 3.7","qwen3.7-plus","◍"},
 	{"Doubao","doubao","◍"},
+	{"Grok 4","grok-4","◍"},
+	{"GLM 5","glm-5","◍"},
+	{"Llama 3.3","llama-3.3-70b","◍"},
+	{"MiniMax","minimax","◍"},
+	{"Mistral","mistral-large","◍"},
 }
 local mi = 1
 
