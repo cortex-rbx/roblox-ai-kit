@@ -30,6 +30,7 @@ local WM=Enum.Font.GothamBold
 local FS=CFG.size.font
 local function hx(n) return "#"..CFG.colors[n] end
 local hexA="#"..CFG.colors.accent
+local LOGO="rbxassetid://129227232422535"  -- Cortex brain mark
 
 local function new(cls,p,par) local o=Instance.new(cls); for k,v in pairs(p or {}) do o[k]=v end; if par then o.Parent=par end; return o end
 local function esc(s) return (tostring(s):gsub("&","&amp;"):gsub("<","&lt;"):gsub(">","&gt;")) end
@@ -116,17 +117,26 @@ local function codeBlock(src)
 	new("TextLabel",{Size=UDim2.new(1,0,0,0),AutomaticSize=Enum.AutomaticSize.Y,BackgroundTransparency=1,Font=F,TextSize=FS-2,TextColor3=C.dim,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top,TextWrapped=true,Text=src},h)
 	scroll()
 end
+local function thinkLine()
+	ord+=1
+	local h=new("Frame",{Size=UDim2.new(1,0,0,20),BackgroundTransparency=1,LayoutOrder=ord},logF)
+	new("UIPadding",{PaddingTop=UDim.new(0,6)},h)
+	new("UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,VerticalAlignment=Enum.VerticalAlignment.Center,Padding=UDim.new(0,7)},h)
+	new("ImageLabel",{BackgroundTransparency=1,Size=UDim2.new(0,15,0,15),Image=LOGO,ScaleType=Enum.ScaleType.Fit,LayoutOrder=1},h)
+	new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,16),Font=F,TextSize=FS,TextColor3=C.dim,Text="Thinking…",LayoutOrder=2},h)
+	scroll(); return h
+end
 
 -- ── splash (пустая сессия) ──
 local splash=new("Frame",{Size=UDim2.new(1,0,1,0),BackgroundTransparency=1,ZIndex=5},logF)
 do
 	local col=new("Frame",{Size=UDim2.new(1,0,1,0),BackgroundTransparency=1},splash)
 	new("UIListLayout",{FillDirection=Enum.FillDirection.Vertical,HorizontalAlignment=Enum.HorizontalAlignment.Center,VerticalAlignment=Enum.VerticalAlignment.Center,Padding=UDim.new(0,6)},col)
-	-- TODO: заменить на настоящий логотип-картинку (ImageLabel с rbxassetid), когда пришлют
-	new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Font=WM,TextSize=40,TextColor3=C.accent,Text=CFG.title,LayoutOrder=1},col)
-	new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Font=F,TextSize=14,TextColor3=C.dim,Text="code · опиши, что построить",LayoutOrder=2},col)
+	new("ImageLabel",{BackgroundTransparency=1,Size=UDim2.new(0,76,0,76),Image=LOGO,ScaleType=Enum.ScaleType.Fit,LayoutOrder=1},col)
+	new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Font=WM,TextSize=18,TextColor3=C.text,Text=CFG.title,LayoutOrder=2},col)
+	new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Font=F,TextSize=13,TextColor3=C.dim,Text="опиши, что построить",LayoutOrder=3},col)
 	if PLAN~="pro" then
-		new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Font=F,TextSize=12,TextColor3=C.faint,Text="Free · 15 сообщений/день · 3 модели",LayoutOrder=3},col)
+		new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Font=F,TextSize=12,TextColor3=C.faint,Text="Free · 15 сообщений/день · 3 модели",LayoutOrder=4},col)
 	end
 end
 
@@ -166,8 +176,7 @@ local function run()
 	line("<font color='"..hexA.."'>›</font> <font color='"..hx("text").."'>"..esc(req).."</font>", 12)
 	local s=selInst()
 	local ctx=s and ("Selected: "..s:GetFullName().." ("..s.ClassName..")"..(s:IsA("LuaSourceContainer") and ("\nIts source:\n"..s.Source) or "")) or "Nothing is selected."
-	-- thinking (глиф — заменим на лого-картинку когда пришлют)
-	local think=line("<font color='"..hexA.."'>◆</font> <font color='"..hx("dim").."'>Thinking…</font>", 6)
+	local think=thinkLine()
 	task.spawn(function()
 		local system="You are Cortex, an AI that edits a Roblox place from inside Studio as a plugin. Turn the user's request into a Luau snippet that performs it when run. Return ONLY Luau in one ```lua code block, no words outside it.\n\n"..ctx
 		local reply,e=ask(system,req)
