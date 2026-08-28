@@ -29,7 +29,14 @@ local F = Enum.Font.Code  -- моноширинный — терминал
 local HEX = { accent="#d98a3d", ok="#a8c47f", dim="#9c8b76", faint="#5f5140",
 	text="#e9e0d2", user="#e0be82", err="#d17a52" }
 
-local MODELS = { {"Fable 5","fable-5","◍"}, {"GPT-5.6 Sol","gpt-5.6-sol","◍"} }
+local MODELS = {
+	{"Fable 5","fable-5","◍"},
+	{"GPT-5.6 Sol","gpt-5.6-sol","◍"},
+	{"Gemini 3","gemini-3-flash","◍"},
+	{"Grok 4.2","grok-4.20-fast","◍"},
+	{"DeepSeek V4","deepseek-v4-pro","◍"},
+	{"Qwen 3.7","qwen3.7-plus","◍"},
+}
 local mi = 1
 
 local function new(cls,props,parent)
