@@ -55,7 +55,7 @@ do local b=httpJSON("GET",ROOT.."/v1/balance",key)
 	if b then PLAN=b.plan or "free"; usedToday=b.msgs_today or 0; DAILY=b.daily or 15; unitsLeft=b.units_left or 0 end
 end
 
-local ALL={ {"OSA Ultra","osa-ultra"},{"OSA Fast","osa-fast"},{"Fable 5","fable-5"},
+local ALL={ {"OSA Ultra","osa-ultra"},{"OSA Fast","osa-fast"},{"Claude","claude"},{"Fable 5","fable-5"},
 	{"Opus 4.8","claude-opus-4-8"},{"Sonnet 5","claude-sonnet-5"},{"GPT-5","gpt-5"},
 	{"DeepSeek V4","deepseek-v4-pro"},{"Qwen 3.7","qwen3.7-plus"},{"Doubao","doubao"},
 	{"Grok 4","grok-4"},{"GLM 5","glm-5"},{"Llama 3.3","llama-3.3-70b"},{"MiniMax","minimax"},{"Mistral","mistral-large"} }
