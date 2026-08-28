@@ -31,6 +31,8 @@ local HEX = { accent="#d98a3d", ok="#a8c47f", dim="#9c8b76", faint="#5f5140",
 
 local MODELS = {
 	{"Fable 5","fable-5","◍"},
+	{"Opus 4.8","claude-opus-4-8","◍"},
+	{"Sonnet 5","claude-sonnet-5","◍"},
 	{"GPT-5","gpt-5","◍"},
 	{"DeepSeek V4","deepseek-v4-pro","◍"},
 	{"Qwen 3.7","qwen3.7-plus","◍"},
