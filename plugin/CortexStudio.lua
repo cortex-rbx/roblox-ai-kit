@@ -5,6 +5,7 @@ return function(plugin, KEY)
 local HttpService = game:GetService("HttpService")
 local Selection   = game:GetService("Selection")
 local CHS         = game:GetService("ChangeHistoryService")
+local Tween       = game:GetService("TweenService")
 
 local ROOT = "https://alishergiyasov100boop--280269849ac811f18ca91607ee4eb77e.web.val.run"
 local BASE = ROOT.."/npc"
@@ -24,6 +25,8 @@ pcall(function()
 end)
 local C={}; for k,v in pairs(CFG.colors) do C[k]=Color3.fromHex(v) end
 C.rail=C.rail or C.panel; C.accentD=C.accentD or C.accent:Lerp(C.bg,0.35); C.user=C.user or C.accent
+C.hover=C.bg:Lerp(C.panel,0.55)
+local RAD=CFG.size.corner or 0
 local F=Enum.Font.Code
 local WM=Enum.Font.GothamBold
 local FS=CFG.size.font
@@ -33,6 +36,17 @@ local LOGO="rbxassetid://129227232422535"
 
 local function new(cls,p,par) local o=Instance.new(cls); for k,v in pairs(p or {}) do o[k]=v end; if par then o.Parent=par end; return o end
 local function esc(s) return (tostring(s):gsub("&","&amp;"):gsub("<","&lt;"):gsub(">","&gt;")) end
+-- ── motion (Apple-smooth: soft ease-out) ──
+local SOFT=TweenInfo.new(0.34,Enum.EasingStyle.Quint,Enum.EasingDirection.Out)
+local SNAP=TweenInfo.new(0.14,Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
+local PULSE=TweenInfo.new(0.85,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut,-1,true)
+local function tw(o,info,props) local t=Tween:Create(o,info,props); t:Play(); return t end
+-- element enters with a soft fade + settle-down; kind: "text" | "frame"
+local function enter(o,kind,fade)
+	local sc=new("UIScale",{Scale=0.985},o); tw(sc,SOFT,{Scale=1})
+	if kind=="text" then o.TextTransparency=1; tw(o,SOFT,{TextTransparency=fade or 0})
+	elseif kind=="frame" then o.BackgroundTransparency=1; tw(o,SOFT,{BackgroundTransparency=fade or 0}) end
+end
 local function httpJSON(method,url,key,body)
 	local ok,res=pcall(function()
 		local h={["Content-Type"]="application/json",["User-Agent"]="Roblox/Studio"}
@@ -74,13 +88,19 @@ local toolbar=plugin:CreateToolbar("Cortex")
 local button=toolbar:CreateButton("Cortex","AI terminal","")
 local info=DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Right,true,false,420,600,320,420)
 local widget=plugin:CreateDockWidgetPluginGui("CortexTerm_v4",info); widget.Title="Cortex"
-button.Click:Connect(function() widget.Enabled=not widget.Enabled end)
 local root=new("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=C.bg,BorderSizePixel=0,ClipsDescendants=true},widget)
-if (CFG.size.corner or 0)>0 then new("UICorner",{CornerRadius=UDim.new(0,CFG.size.corner)},root) end
+if RAD>0 then new("UICorner",{CornerRadius=UDim.new(0,RAD)},root) end
+local rootScale=new("UIScale",{Scale=1},root)
+button.Click:Connect(function()
+	widget.Enabled=not widget.Enabled
+	if widget.Enabled then rootScale.Scale=0.985; tw(rootScale,SOFT,{Scale=1}) end
+end)
 
 -- ── header ──
 local HH=CFG.size.headerH
 local bar=new("Frame",{Size=UDim2.new(1,0,0,HH),BackgroundColor3=C.panel,BorderSizePixel=0},root)
+if RAD>0 then new("UICorner",{CornerRadius=UDim.new(0,RAD)},bar)
+	new("Frame",{Size=UDim2.new(1,0,0,RAD),Position=UDim2.new(0,0,1,-RAD),BackgroundColor3=C.panel,BorderSizePixel=0,ZIndex=0},bar) end
 new("Frame",{Size=UDim2.new(1,0,0,1),Position=UDim2.new(0,0,1,-1),BackgroundColor3=C.line,BorderSizePixel=0},bar)
 for i,col in ipairs({"6fae57","e05650","4a9eff"}) do
 	local d=new("Frame",{Size=UDim2.new(0,12,0,12),Position=UDim2.new(0,14+(i-1)*18,0.5,-6),BackgroundColor3=Color3.fromHex(col),BorderSizePixel=0},bar)
@@ -91,14 +111,23 @@ new("UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,HorizontalAlignm
 new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,20),Font=WM,TextSize=17,TextColor3=C.text,Text=CFG.title,LayoutOrder=1},wm)
 new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,16),Font=F,TextSize=12,TextColor3=C.accent,Text="code",LayoutOrder=2},wm)
 local modelBtn=new("TextButton",{AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,26),AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.new(0.5,0,0.5,0),BackgroundColor3=C.bg,BorderSizePixel=0,AutoButtonColor=false,Text=""},bar)
-new("UICorner",{CornerRadius=UDim.new(0,6)},modelBtn); new("UIStroke",{Color=C.line,Thickness=1},modelBtn)
+new("UICorner",{CornerRadius=UDim.new(0,8)},modelBtn)
+local mStroke=new("UIStroke",{Color=C.line,Thickness=1},modelBtn)
+local mScale=new("UIScale",{Scale=1},modelBtn)
 new("UIPadding",{PaddingLeft=UDim.new(0,9),PaddingRight=UDim.new(0,9)},modelBtn)
 new("UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,VerticalAlignment=Enum.VerticalAlignment.Center,Padding=UDim.new(0,6)},modelBtn)
 local mLogo=new("ImageLabel",{Size=UDim2.new(0,15,0,15),BackgroundTransparency=1,ScaleType=Enum.ScaleType.Fit,LayoutOrder=1},modelBtn)
 local mName=new("TextLabel",{AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,16),BackgroundTransparency=1,Font=F,TextSize=12,TextColor3=C.accent,LayoutOrder=2},modelBtn)
 new("TextLabel",{AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,16),BackgroundTransparency=1,Font=F,TextSize=12,TextColor3=C.faint,Text="▾",LayoutOrder=3},modelBtn)
 local function refM() mLogo.Image="rbxassetid://"..MODELS[mi][3]; mName.Text=MODELS[mi][1] end; refM()
-modelBtn.MouseButton1Click:Connect(function() mi=(mi%#MODELS)+1; refM() end)
+modelBtn.MouseEnter:Connect(function() tw(modelBtn,SNAP,{BackgroundColor3=C.hover}); tw(mStroke,SNAP,{Color=C.accentD}) end)
+modelBtn.MouseLeave:Connect(function() tw(modelBtn,SNAP,{BackgroundColor3=C.bg}); tw(mStroke,SNAP,{Color=C.line}) end)
+modelBtn.MouseButton1Click:Connect(function()
+	mi=(mi%#MODELS)+1
+	mScale.Scale=0.9; tw(mScale,SOFT,{Scale=1})
+	tw(mLogo,SNAP,{ImageTransparency=1}); tw(mName,SNAP,{TextTransparency=1})
+	task.delay(0.14,function() refM(); tw(mLogo,SNAP,{ImageTransparency=0}); tw(mName,SNAP,{TextTransparency=0}) end)
+end)
 
 -- ── chats bar ──
 local CB=30
@@ -122,11 +151,12 @@ new("UIPadding",{PaddingTop=UDim.new(0,CFG.size.logPad),PaddingBottom=UDim.new(0
 local lay=new("UIListLayout",{Padding=UDim.new(0,3),SortOrder=Enum.SortOrder.LayoutOrder},logF)
 local content={}
 local ord=0
-local function scroll() task.defer(function() logF.CanvasPosition=Vector2.new(0,lay.AbsoluteContentSize.Y) end) end
+local function scroll() task.defer(function() tw(logF,SNAP,{CanvasPosition=Vector2.new(0,lay.AbsoluteContentSize.Y)}) end) end
 local function line(rich,gap)
 	ord+=1
 	local l=new("TextLabel",{Size=UDim2.new(1,0,0,0),AutomaticSize=Enum.AutomaticSize.Y,BackgroundTransparency=1,Font=F,TextSize=FS,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top,TextWrapped=true,RichText=true,Text=rich,LayoutOrder=ord},logF)
 	if gap then new("UIPadding",{PaddingTop=UDim.new(0,gap)},l) end
+	enter(l,"text")
 	table.insert(content,l); scroll(); return l
 end
 local function codeBlock(src)
@@ -136,7 +166,8 @@ local function codeBlock(src)
 	new("UICorner",{CornerRadius=UDim.new(0,6)},h)
 	new("UIPadding",{PaddingTop=UDim.new(0,6),PaddingBottom=UDim.new(0,6),PaddingLeft=UDim.new(0,12),PaddingRight=UDim.new(0,8)},h)
 	new("Frame",{Size=UDim2.new(0,2,1,0),BackgroundColor3=C.line,BorderSizePixel=0},h)
-	new("TextLabel",{Size=UDim2.new(1,0,0,0),AutomaticSize=Enum.AutomaticSize.Y,BackgroundTransparency=1,Font=F,TextSize=FS-2,TextColor3=C.dim,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top,TextWrapped=true,Text=src},h)
+	local tl=new("TextLabel",{Size=UDim2.new(1,0,0,0),AutomaticSize=Enum.AutomaticSize.Y,BackgroundTransparency=1,Font=F,TextSize=FS-2,TextColor3=C.dim,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top,TextWrapped=true,Text=src},h)
+	enter(h,"frame"); tl.TextTransparency=1; tw(tl,SOFT,{TextTransparency=0})
 	table.insert(content,h); scroll()
 end
 local function thinkLine()
@@ -144,8 +175,11 @@ local function thinkLine()
 	local h=new("Frame",{Size=UDim2.new(1,0,0,22),BackgroundTransparency=1,LayoutOrder=ord},logF)
 	new("UIPadding",{PaddingTop=UDim.new(0,6)},h)
 	new("UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,VerticalAlignment=Enum.VerticalAlignment.Center,Padding=UDim.new(0,7)},h)
-	new("ImageLabel",{BackgroundTransparency=1,Size=UDim2.new(0,15,0,15),Image=LOGO,ScaleType=Enum.ScaleType.Fit,LayoutOrder=1},h)
-	new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,16),Font=F,TextSize=FS,TextColor3=C.dim,Text="Thinking…",LayoutOrder=2},h)
+	local img=new("ImageLabel",{BackgroundTransparency=1,Size=UDim2.new(0,15,0,15),Image=LOGO,ScaleType=Enum.ScaleType.Fit,LayoutOrder=1},h)
+	local txt=new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,16),Font=F,TextSize=FS,TextColor3=C.dim,Text="Thinking…",LayoutOrder=2},h)
+	img.ImageTransparency=1; txt.TextTransparency=1
+	tw(img,SOFT,{ImageTransparency=0}); tw(txt,SOFT,{TextTransparency=0})
+	task.delay(0.34,function() if txt.Parent then tw(txt,PULSE,{TextTransparency=0.55}); tw(img,PULSE,{ImageTransparency=0.4}) end end)
 	table.insert(content,h); scroll(); return h
 end
 local splash
@@ -157,6 +191,11 @@ local function showSplash()
 	new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Font=WM,TextSize=18,TextColor3=C.text,Text=CFG.title,LayoutOrder=2},col)
 	new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Font=F,TextSize=13,TextColor3=C.dim,Text="опиши, что построить",LayoutOrder=3},col)
 	if PLAN~="pro" then new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Font=F,TextSize=12,TextColor3=C.faint,Text="Free · "..DAILY.." сообщений/день · 3 модели",LayoutOrder=4},col) end
+	local sc=new("UIScale",{Scale=0.94},col); tw(sc,SOFT,{Scale=1})
+	for _,ch in ipairs(col:GetChildren()) do
+		if ch:IsA("TextLabel") then ch.TextTransparency=1; tw(ch,SOFT,{TextTransparency=0})
+		elseif ch:IsA("ImageLabel") then ch.ImageTransparency=1; tw(ch,SOFT,{ImageTransparency=0}) end
+	end
 	table.insert(content,splash)
 end
 local function clearContent()
@@ -206,12 +245,18 @@ renderChats=function()
 	for i,ch in ipairs(chats) do
 		local active=i==cur
 		local pill=new("TextButton",{AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,20),BackgroundColor3=active and C.panel or C.bg,BorderSizePixel=0,AutoButtonColor=false,Font=F,TextSize=11,TextColor3=active and C.accent or C.dim,Text="  "..ch.name.."  ",LayoutOrder=i},tabsHold)
-		new("UICorner",{CornerRadius=UDim.new(0,5)},pill)
-		new("UIStroke",{Color=active and C.accentD or C.line,Thickness=1},pill)
+		new("UICorner",{CornerRadius=UDim.new(0,8)},pill)
+		local ps=new("UIStroke",{Color=active and C.accentD or C.line,Thickness=1},pill)
+		if not active then
+			pill.MouseEnter:Connect(function() tw(pill,SNAP,{BackgroundColor3=C.hover}); tw(ps,SNAP,{Color=C.accentD}) end)
+			pill.MouseLeave:Connect(function() tw(pill,SNAP,{BackgroundColor3=C.bg}); tw(ps,SNAP,{Color=C.line}) end)
+		end
 		pill.MouseButton1Click:Connect(function() switchTo(i) end)
 	end
 	local plus=new("TextButton",{Size=UDim2.new(0,22,0,20),BackgroundColor3=C.bg,BorderSizePixel=0,AutoButtonColor=false,Font=F,TextSize=14,TextColor3=C.dim,Text="+",LayoutOrder=999},tabsHold)
-	new("UICorner",{CornerRadius=UDim.new(0,5)},plus); new("UIStroke",{Color=C.line,Thickness=1},plus)
+	new("UICorner",{CornerRadius=UDim.new(0,8)},plus); local plusStroke=new("UIStroke",{Color=C.line,Thickness=1},plus)
+	plus.MouseEnter:Connect(function() tw(plus,SNAP,{BackgroundColor3=C.hover}); tw(plusStroke,SNAP,{Color=C.accentD}) end)
+	plus.MouseLeave:Connect(function() tw(plus,SNAP,{BackgroundColor3=C.bg}); tw(plusStroke,SNAP,{Color=C.line}) end)
 	plus.MouseButton1Click:Connect(newChat)
 end
 
@@ -224,12 +269,16 @@ end
 
 -- ── input ──
 local prow=new("Frame",{Size=UDim2.new(1,0,0,IH),Position=UDim2.new(0,0,1,-IH),BackgroundColor3=C.panel,BorderSizePixel=0},root)
+if RAD>0 then new("UICorner",{CornerRadius=UDim.new(0,RAD)},prow)
+	new("Frame",{Size=UDim2.new(1,0,0,RAD),Position=UDim2.new(0,0,0,0),BackgroundColor3=C.panel,BorderSizePixel=0,ZIndex=0},prow) end
 new("Frame",{Size=UDim2.new(1,0,0,1),BackgroundColor3=C.line,BorderSizePixel=0},prow)
 new("UIPadding",{PaddingLeft=UDim.new(0,14),PaddingRight=UDim.new(0,14)},prow)
-new("TextLabel",{Size=UDim2.new(0,14,1,0),BackgroundTransparency=1,Font=F,TextSize=FS+1,TextColor3=C.accent,Text="›",TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Center},prow)
+local pchar=new("TextLabel",{Size=UDim2.new(0,14,1,0),BackgroundTransparency=1,Font=F,TextSize=FS+1,TextColor3=C.accent,Text="›",TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Center},prow)
 local rightW=CFG.show.runHint and 90 or 20
 local boxx=new("TextBox",{Size=UDim2.new(1,-6-rightW,1,-14),Position=UDim2.new(0,20,0,7),BackgroundTransparency=1,TextColor3=C.text,PlaceholderColor3=C.faint,PlaceholderText="опиши, что построить…",Font=F,TextSize=FS,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Center,ClearTextOnFocus=false,TextWrapped=true,Text=""},prow)
 if CFG.show.runHint then new("TextLabel",{Size=UDim2.new(0,70,1,0),Position=UDim2.new(1,-70,0,0),BackgroundTransparency=1,Font=F,TextSize=11,TextXAlignment=Enum.TextXAlignment.Right,TextYAlignment=Enum.TextYAlignment.Center,RichText=true,Text="<font color='"..hx("faint").."'>Enter </font><font color='"..hexA.."'>run</font>"},prow) end
+boxx.Focused:Connect(function() tw(pchar,SNAP,{TextColor3=C.text}) end)
+boxx.FocusLost:Connect(function() tw(pchar,SNAP,{TextColor3=C.accent}) end)
 
 local busy=false
 local function run()
