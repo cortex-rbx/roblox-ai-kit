@@ -1,6 +1,9 @@
 {
   "title": "CORTEX",
-  "colors": {"bg":"000000","panel":"17120d","text":"e9e0d2","dim":"9c8b76","faint":"5f5140","line":"2a2118","accent":"ffffff","ok":"00ff00","err":"d17a52"},
-  "size": {"font":14,"headerH":40,"inputH":56,"logPad":16,"corner":8},
-  "show": {"studioTag":true,"modelChip":true,"hint":true,"codeBlock":true,"runHint":true}
+  "colors": {
+    "bg": "000000", "accent": "ffffff", "text": "e9e0d2", "panel": "17120d",
+    "ok": "00ff00", "line": "6b4a31", "dim": "9c8b76", "faint": "5f5140", "err": "d17a52"
+  },
+  "size": { "font": 16, "headerH": 60, "inputH": 40, "logPad": 22, "corner": 20 },
+  "show": { "studioTag": true, "modelChip": true, "hint": true, "codeBlock": true, "runHint": true }
 }
