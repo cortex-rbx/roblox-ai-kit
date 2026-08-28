@@ -36,6 +36,7 @@ local MODELS = {
 	{"GPT-5","gpt-5","◍"},
 	{"DeepSeek V4","deepseek-v4-pro","◍"},
 	{"Qwen 3.7","qwen3.7-plus","◍"},
+	{"Doubao","doubao","◍"},
 }
 local mi = 1
 
