@@ -46,6 +46,7 @@ local hexA = "#"..CFG.colors.accent
 local function hx(name) return "#"..CFG.colors[name] end
 
 local MODELS = {
+	{"OSA Ultra","osa-ultra"},
 	{"Fable 5","fable-5"},{"Opus 4.8","claude-opus-4-8"},{"Sonnet 5","claude-sonnet-5"},
 	{"GPT-5","gpt-5"},{"DeepSeek V4","deepseek-v4-pro"},{"Qwen 3.7","qwen3.7-plus"},
 	{"Doubao","doubao"},{"Grok 4","grok-4"},{"GLM 5","glm-5"},
