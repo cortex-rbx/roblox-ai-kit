@@ -67,7 +67,8 @@ local widget=plugin:CreateDockWidgetPluginGui("CortexTerm_v2",info)
 widget.Title="Cortex"
 button.Click:Connect(function() widget.Enabled=not widget.Enabled end)
 
-local root=new("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=C.bg,BorderSizePixel=0},widget)
+local root=new("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=C.bg,BorderSizePixel=0,ClipsDescendants=true},widget)
+if (CFG.size.corner or 0) > 0 then new("UICorner",{CornerRadius=UDim.new(0,CFG.size.corner)},root) end
 
 -- top bar
 local HH=CFG.size.headerH
