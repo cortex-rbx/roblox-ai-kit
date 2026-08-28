@@ -42,8 +42,13 @@ local SNAP=TweenInfo.new(0.14,Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
 local PULSE=TweenInfo.new(0.85,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut,-1,true)
 local function tw(o,info,props) local t=Tween:Create(o,info,props); t:Play(); return t end
 -- element enters with a soft fade + settle-down; kind: "text" | "frame"
+-- pop: temp UIScale that self-destructs on finish, so text renders crisp at rest
+local function pop(o,from,info)
+	local sc=new("UIScale",{Scale=from},o)
+	tw(sc,info or SOFT,{Scale=1}).Completed:Connect(function() sc:Destroy() end)
+end
 local function enter(o,kind,fade)
-	local sc=new("UIScale",{Scale=0.985},o); tw(sc,SOFT,{Scale=1})
+	pop(o,0.99)
 	if kind=="text" then o.TextTransparency=1; tw(o,SOFT,{TextTransparency=fade or 0})
 	elseif kind=="frame" then o.BackgroundTransparency=1; tw(o,SOFT,{BackgroundTransparency=fade or 0}) end
 end
@@ -90,10 +95,9 @@ local info=DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Right,true,false,42
 local widget=plugin:CreateDockWidgetPluginGui("CortexTerm_v4",info); widget.Title="Cortex"
 local root=new("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=C.bg,BorderSizePixel=0,ClipsDescendants=true},widget)
 if RAD>0 then new("UICorner",{CornerRadius=UDim.new(0,RAD)},root) end
-local rootScale=new("UIScale",{Scale=1},root)
 button.Click:Connect(function()
 	widget.Enabled=not widget.Enabled
-	if widget.Enabled then rootScale.Scale=0.985; tw(rootScale,SOFT,{Scale=1}) end
+	if widget.Enabled then pop(root,0.985) end
 end)
 
 -- ── header ──
@@ -113,7 +117,6 @@ new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.X,Siz
 local modelBtn=new("TextButton",{AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,26),AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.new(0.5,0,0.5,0),BackgroundColor3=C.bg,BorderSizePixel=0,AutoButtonColor=false,Text=""},bar)
 new("UICorner",{CornerRadius=UDim.new(0,8)},modelBtn)
 local mStroke=new("UIStroke",{Color=C.line,Thickness=1},modelBtn)
-local mScale=new("UIScale",{Scale=1},modelBtn)
 new("UIPadding",{PaddingLeft=UDim.new(0,9),PaddingRight=UDim.new(0,9)},modelBtn)
 new("UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,VerticalAlignment=Enum.VerticalAlignment.Center,Padding=UDim.new(0,6)},modelBtn)
 local mLogo=new("ImageLabel",{Size=UDim2.new(0,15,0,15),BackgroundTransparency=1,ScaleType=Enum.ScaleType.Fit,LayoutOrder=1},modelBtn)
@@ -124,7 +127,7 @@ modelBtn.MouseEnter:Connect(function() tw(modelBtn,SNAP,{BackgroundColor3=C.hove
 modelBtn.MouseLeave:Connect(function() tw(modelBtn,SNAP,{BackgroundColor3=C.bg}); tw(mStroke,SNAP,{Color=C.line}) end)
 modelBtn.MouseButton1Click:Connect(function()
 	mi=(mi%#MODELS)+1
-	mScale.Scale=0.9; tw(mScale,SOFT,{Scale=1})
+	pop(modelBtn,0.92)
 	tw(mLogo,SNAP,{ImageTransparency=1}); tw(mName,SNAP,{TextTransparency=1})
 	task.delay(0.14,function() refM(); tw(mLogo,SNAP,{ImageTransparency=0}); tw(mName,SNAP,{TextTransparency=0}) end)
 end)
@@ -191,7 +194,7 @@ local function showSplash()
 	new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Font=WM,TextSize=18,TextColor3=C.text,Text=CFG.title,LayoutOrder=2},col)
 	new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Font=F,TextSize=13,TextColor3=C.dim,Text="опиши, что построить",LayoutOrder=3},col)
 	if PLAN~="pro" then new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.XY,Font=F,TextSize=12,TextColor3=C.faint,Text="Free · "..DAILY.." сообщений/день · 3 модели",LayoutOrder=4},col) end
-	local sc=new("UIScale",{Scale=0.94},col); tw(sc,SOFT,{Scale=1})
+	pop(col,0.94)
 	for _,ch in ipairs(col:GetChildren()) do
 		if ch:IsA("TextLabel") then ch.TextTransparency=1; tw(ch,SOFT,{TextTransparency=0})
 		elseif ch:IsA("ImageLabel") then ch.ImageTransparency=1; tw(ch,SOFT,{ImageTransparency=0}) end
