@@ -55,14 +55,18 @@ do local b=httpJSON("GET",ROOT.."/v1/balance",key)
 	if b then PLAN=b.plan or "free"; usedToday=b.msgs_today or 0; DAILY=b.daily or 15; unitsLeft=b.units_left or 0 end
 end
 
-local ALL={ {"OSA Ultra","osa-ultra"},{"OSA Fast","osa-fast"},{"Claude","claude"},{"Fable 5","fable-5"},
-	{"Opus 4.8","claude-opus-4-8"},{"Sonnet 5","claude-sonnet-5"},{"GPT-5","gpt-5"},
-	{"DeepSeek V4","deepseek-v4-pro"},{"Qwen 3.7","qwen3.7-plus"},{"Doubao","doubao"},
-	{"Grok 4","grok-4"},{"GLM 5","glm-5"},{"Llama 3.3","llama-3.3-70b"},{"MiniMax","minimax"},{"Mistral","mistral-large"} }
+local L={ cortex="129227232422535",claude="119672220329569",gpt="75948684097269",
+	deepseek="87294705657934",qwen="110320732028053",doubao="81749567095455",
+	grok="79089215554482",glm="76066601672091",llama="87203537265732",
+	minimax="96077423727438",mistral="88824165054695",gemini="118291541782496" }
+local ALL={ {"OSA Ultra","osa-ultra",L.cortex},{"OSA Fast","osa-fast",L.cortex},{"Claude","claude",L.claude},{"Fable 5","fable-5",L.claude},
+	{"Opus 4.8","claude-opus-4-8",L.claude},{"Sonnet 5","claude-sonnet-5",L.claude},{"GPT-5","gpt-5",L.gpt},
+	{"DeepSeek V4","deepseek-v4-pro",L.deepseek},{"Qwen 3.7","qwen3.7-plus",L.qwen},{"Doubao","doubao",L.doubao},
+	{"Grok 4","grok-4",L.grok},{"GLM 5","glm-5",L.glm},{"Llama 3.3","llama-3.3-70b",L.llama},{"MiniMax","minimax",L.minimax},{"Mistral","mistral-large",L.mistral} }
 local FREE={["osa-fast"]=true,["qwen3.7-plus"]=true,["deepseek-v4-pro"]=true}
 local MODELS={}
 if PLAN=="pro" then MODELS=ALL else for _,m in ipairs(ALL) do if FREE[m[2]] then table.insert(MODELS,m) end end end
-if #MODELS==0 then MODELS={{"OSA Fast","osa-fast"}} end
+if #MODELS==0 then MODELS={{"OSA Fast","osa-fast",L.cortex}} end
 local mi=1
 
 -- ── widget ──
@@ -86,10 +90,14 @@ local wm=new("Frame",{Size=UDim2.new(0,150,1,0),Position=UDim2.new(1,-160,0,0),B
 new("UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,HorizontalAlignment=Enum.HorizontalAlignment.Right,VerticalAlignment=Enum.VerticalAlignment.Center,Padding=UDim.new(0,6)},wm)
 new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,20),Font=WM,TextSize=17,TextColor3=C.text,Text=CFG.title,LayoutOrder=1},wm)
 new("TextLabel",{BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,16),Font=F,TextSize=12,TextColor3=C.accent,Text="code",LayoutOrder=2},wm)
-local modelBtn=new("TextButton",{Size=UDim2.new(0,120,0,26),Position=UDim2.new(0.5,-60,0.5,-13),BackgroundColor3=C.bg,BorderSizePixel=0,AutoButtonColor=false,Text=""},bar)
+local modelBtn=new("TextButton",{AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,26),AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.new(0.5,0,0.5,0),BackgroundColor3=C.bg,BorderSizePixel=0,AutoButtonColor=false,Text=""},bar)
 new("UICorner",{CornerRadius=UDim.new(0,6)},modelBtn); new("UIStroke",{Color=C.line,Thickness=1},modelBtn)
-local modelTxt=new("TextLabel",{Size=UDim2.new(1,-14,1,0),Position=UDim2.new(0,10,0,0),BackgroundTransparency=1,Font=F,TextSize=12,TextXAlignment=Enum.TextXAlignment.Left,RichText=true},modelBtn)
-local function refM() modelTxt.Text="<font color='"..hx("dim").."'>◍ </font><font color='"..hx("accent").."'>"..MODELS[mi][1].."</font><font color='"..hx("faint").."'> ▾</font>" end; refM()
+new("UIPadding",{PaddingLeft=UDim.new(0,9),PaddingRight=UDim.new(0,9)},modelBtn)
+new("UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,VerticalAlignment=Enum.VerticalAlignment.Center,Padding=UDim.new(0,6)},modelBtn)
+local mLogo=new("ImageLabel",{Size=UDim2.new(0,15,0,15),BackgroundTransparency=1,ScaleType=Enum.ScaleType.Fit,LayoutOrder=1},modelBtn)
+local mName=new("TextLabel",{AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,16),BackgroundTransparency=1,Font=F,TextSize=12,TextColor3=C.accent,LayoutOrder=2},modelBtn)
+new("TextLabel",{AutomaticSize=Enum.AutomaticSize.X,Size=UDim2.new(0,0,0,16),BackgroundTransparency=1,Font=F,TextSize=12,TextColor3=C.faint,Text="▾",LayoutOrder=3},modelBtn)
+local function refM() mLogo.Image="rbxassetid://"..MODELS[mi][3]; mName.Text=MODELS[mi][1] end; refM()
 modelBtn.MouseButton1Click:Connect(function() mi=(mi%#MODELS)+1; refM() end)
 
 -- ── chats bar ──
