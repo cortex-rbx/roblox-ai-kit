@@ -85,7 +85,8 @@ local L={ cortex="129227232422535",claude="119672220329569",gpt="75948684097269"
 local ALL={ {"OSA Ultra","osa-ultra",L.cortex},{"OSA Fast","osa-fast",L.cortex},{"Claude","claude",L.claude},{"Fable 5","fable-5",L.claude},
 	{"Opus 4.8","claude-opus-4-8",L.claude},{"Sonnet 5","claude-sonnet-5",L.claude},{"GPT-5","gpt-5",L.gpt},
 	{"DeepSeek V4","deepseek-v4-pro",L.deepseek},{"Qwen 3.7","qwen3.7-plus",L.qwen},{"Doubao","doubao",L.doubao},
-	{"Grok 4","grok-4",L.grok},{"GLM 5","glm-5",L.glm},{"Llama 3.3","llama-3.3-70b",L.llama},{"MiniMax","minimax",L.minimax},{"Mistral","mistral-large",L.mistral} }
+	{"Grok 4","grok-4",L.grok},{"Llama 3.3","llama-3.3-70b",L.llama},{"MiniMax","minimax",L.minimax},{"Mistral","mistral-large",L.mistral} }
+-- GLM 5 временно убран из линейки: таймаутит с облачного IP Val.town, вернём после cloud-надёжного хоста
 local FREE={["osa-fast"]=true,["qwen3.7-plus"]=true,["deepseek-v4-pro"]=true}
 local MODELS={}
 if PLAN=="pro" then MODELS=ALL else for _,m in ipairs(ALL) do if FREE[m[2]] then table.insert(MODELS,m) end end end
