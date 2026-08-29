@@ -58,9 +58,11 @@ local function httpJSON(method,url,key,body)
 		if key then h["Authorization"]="Bearer "..key end
 		return HttpService:RequestAsync({Url=url,Method=method,Headers=h,Body=body and HttpService:JSONEncode(body) or nil})
 	end)
-	if not ok or not res.Success then return nil,(type(res)=="table" and res.Body) or "no-http" end
+	if not ok then return nil, tostring(res) end
+	if not res.Success then return nil, (res.Body~="" and res.Body) or ("HTTP "..tostring(res.StatusCode)) end
 	local g,d=pcall(function() return HttpService:JSONDecode(res.Body) end)
-	return g and d or nil
+	if not g then return nil, "bad json" end
+	return d
 end
 
 -- ── key + plan + limits ──
@@ -265,7 +267,13 @@ end
 
 local function ask(hist,ctx)
 	local d,eb=httpJSON("POST",BASE,key,{system=SYSTEM.."\n\n"..ctx,messages=hist,tier=MODELS[mi][2]})
-	if not d then return nil,"нет сети — нажми Allow" end
+	if not d then
+		local e=tostring(eb or "")
+		if e:find("not enabled") or e:find("HttpEnabled") or e:find("Http requests") then
+			return nil,"HTTP выключен → Game Settings ▸ Security ▸ Allow HTTP Requests (или в Command Bar: game:GetService('HttpService').HttpEnabled=true)"
+		end
+		return nil,"ошибка сети: "..e:sub(1,140)
+	end
 	if d.error then return nil,tostring(type(d.error)=="table" and d.error.message or d.error) end
 	return d.text
 end
