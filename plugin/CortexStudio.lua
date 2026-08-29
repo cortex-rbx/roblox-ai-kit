@@ -6,6 +6,8 @@ local HttpService = game:GetService("HttpService")
 local Selection   = game:GetService("Selection")
 local CHS         = game:GetService("ChangeHistoryService")
 local Tween       = game:GetService("TweenService")
+-- Плагины в Studio могут сами включить HTTP — чтобы юзеру не лезть в Game Settings.
+pcall(function() HttpService.HttpEnabled = true end)
 
 local ROOT = "https://alishergiyasov100boop--280269849ac811f18ca91607ee4eb77e.web.val.run"
 local BASE = ROOT.."/npc"
